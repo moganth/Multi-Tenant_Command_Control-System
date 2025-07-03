@@ -1,0 +1,37 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="16">
+            <item index="0" class="java.lang.String" itemvalue="pydantic-settings" />
+            <item index="1" class="java.lang.String" itemvalue="pymongo" />
+            <item index="2" class="java.lang.String" itemvalue="jwt" />
+            <item index="3" class="java.lang.String" itemvalue="cachetools" />
+            <item index="4" class="java.lang.String" itemvalue="cffi" />
+            <item index="5" class="java.lang.String" itemvalue="cryptography" />
+            <item index="6" class="java.lang.String" itemvalue="pycparser" />
+            <item index="7" class="java.lang.String" itemvalue="uvicorn" />
+            <item index="8" class="java.lang.String" itemvalue="bcrypt" />
+            <item index="9" class="java.lang.String" itemvalue="motor" />
+            <item index="10" class="java.lang.String" itemvalue="python-dotenv" />
+            <item index="11" class="java.lang.String" itemvalue="databases" />
+            <item index="12" class="java.lang.String" itemvalue="fastapi" />
+            <item index="13" class="java.lang.String" itemvalue="pydantic" />
+            <item index="14" class="java.lang.String" itemvalue="asyncpg" />
+            <item index="15" class="java.lang.String" itemvalue="sqlalchemy" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyTypeCheckerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="Pytest.source.*" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
