@@ -9,6 +9,11 @@ from utils.database import get_database, connect_to_mongo
 from utils.mqtt_client import mqtt_client
 from utils.firebase_client import firebase_client
 
+
+@celery_app.on_after_configure.connect
+def setup_mqtt_client(sender, **kwargs):
+    mqtt_client.connect()
+
 @celery_app.task(bind=True)
 def send_bulk_command(self, tenant_id: str, device_ids: list, command: str, parameters: dict):
     try:

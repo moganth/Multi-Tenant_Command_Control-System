@@ -91,7 +91,8 @@ def start_celery_worker():
         "-A", "celery_app.celery_app",
         "worker",
         "--loglevel=info",
-        "--pool=solo"
+        "--pool=solo",
+        "-E"
     ]
     env = os.environ.copy()
     subprocess.Popen(cmd, env=env)

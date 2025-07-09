@@ -1,5 +1,7 @@
 from celery import Celery
+from celery.signals import worker_process_init
 from config import settings
+from utils.mqtt_client import mqtt_client
 
 celery_app = Celery(
     "mt_command_control",
@@ -18,3 +20,7 @@ celery_app.conf.update(
     task_time_limit=30 * 60,  # 30 minutes
     task_soft_time_limit=60,  # 1 minute
 )
+
+@worker_process_init.connect
+def init_worker_mqtt(**_):
+    mqtt_client.connect()
