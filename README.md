@@ -1,14 +1,13 @@
 # Multi-Tenant Command & Control System
 
-A scalable, cloud-native platform for remote monitoring and control of distributed devices and systems with enterprise-grade tenant isolation and real-time communication capabilities.
+A scalable platform for remote monitoring and control of distributed devices and systems with tenant isolation and real-time communication capabilities.
 
 ## Problem Statement
 
-Modern organizations require centralized control over distributed devices, systems, and processes across multiple locations, departments, or clients. Traditional solutions often lack:
+Modern organizations require centralized control over distributed devices, systems, and processes across multiple departments, or clients. Traditional solutions often lack:
 
 - **Tenant Isolation**: Secure separation of data and operations between different organizations or departments
-- **Real-time Communication**: Instant bidirectional communication with remote devices
-- **Scalability**: Ability to handle thousands of devices across multiple tenants
+- **Real-time Communication**: Instant bidirectional communication with remote devices```````````````````````````````````````````````````````````````````````````````````````````````````````````
 - **Reliability**: Robust command execution, failure handling, and system monitoring
 - **Multi-protocol Support**: Integration with various device types and communication protocols
 - **Centralized Management**: Unified dashboard for monitoring, control, and analytics
@@ -35,15 +34,13 @@ Key architectural components include FastAPI for high-performance APIs, MQTT/EMQ
 
 ### Device Management
 - **Device Registration & Authentication**: Secure onboarding with certificate-based authentication
-- **Remote Command Execution**: Send commands to individual devices or device groups
-- **Firmware Update Management**: Over-the-air (OTA) updates with rollback capabilities
 - **Health Monitoring**: Real-time device status, performance metrics, and diagnostics
 - **Configuration Management**: Centralized device configuration and policy enforcement
 
 ### Security & Compliance
 - **JWT-based Authentication**: Tenant-aware token management with role-based access
 - **End-to-end Encryption**: Secure communication channels for all data transmission
-- **Audit Logging**: Comprehensive logging of all commands, access, and system events
+- **Audit Logging**: Comprehensive logging of all commands and system events
 - **Data Isolation**: Physical and logical separation of tenant data
 - **Permission Management**: Granular access control with custom roles and permissions
 
@@ -59,7 +56,6 @@ Key architectural components include FastAPI for high-performance APIs, MQTT/EMQ
 - **Webhook Support**: Event-driven notifications to external systems
 - **Plugin Architecture**: Extensible framework for custom device protocols
 - **Data Export**: Multiple formats (JSON, CSV, XML) for data portability
-- **SDK Support**: Client libraries for popular programming languages
 
 ## How It Can Be Reused in Multiple Fields
 
@@ -157,7 +153,6 @@ Key architectural components include FastAPI for high-performance APIs, MQTT/EMQ
 
 ### Real-time Communication
 - **Firebase**: Real-time database and push notifications
-- **WebSockets**: Bidirectional communication for web clients
 
 ### Security & Authentication
 - **JWT**: JSON Web Tokens for stateless authentication
@@ -232,7 +227,6 @@ Once the system is running, access the interactive API documentation at:
 * Set up Celery workers for:
    * Scheduled device health monitoring
    * Background command processing
-   * Device heartbeat validation
 * Integrate Firebase for real-time dashboard updates
 * Store device history and command logs in MongoDB
 * Begin analytics for device performance insights
