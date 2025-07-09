@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from typing import List, Dict, Any
 from schemas.auth import User
 from schemas.device import Command, CommandCreate

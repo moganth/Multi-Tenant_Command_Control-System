@@ -10,16 +10,13 @@ router = APIRouter()
 
 @router.get("/")
 async def health_check():
-    """System health check"""
     try:
-        # Check database connection
         db = await get_database()
         await db.command("ping")
         db_status = "healthy"
     except Exception as e:
         db_status = f"unhealthy: {str(e)}"
 
-    # Check MQTT connection
     mqtt_status = "healthy" if mqtt_client.client.is_connected() else "unhealthy"
 
     return {
@@ -35,6 +32,5 @@ async def health_check():
 async def check_device_health(
         current_user: User = Depends(get_current_active_user)
 ):
-    """Trigger health check for all tenant devices"""
     task = health_check_devices.delay(current_user.tenant_id)
     return {"task_id": task.id, "status": "initiated"}

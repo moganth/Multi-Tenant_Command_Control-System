@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Query
-from typing import List, Dict, Any
+from typing import Dict, Any
 from schemas.auth import User
 from handlers.auth_handler import get_current_active_user
 from celery_tasks import process_device_analytics, generate_tenant_report
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 router = APIRouter()
 
@@ -14,7 +14,6 @@ async def process_device_data(
         data: Dict[str, Any],
         current_user: User = Depends(get_current_active_user)
 ):
-    """Process device analytics data"""
     task = process_device_analytics.delay(current_user.tenant_id, device_id, data)
     return {"task_id": task.id, "status": "processing"}
 
@@ -25,8 +24,7 @@ async def generate_report(
         days_back: int = Query(30, description="Number of days back to include"),
         current_user: User = Depends(get_current_active_user)
 ):
-    """Generate tenant report"""
-    end_date = datetime.utcnow()
+    end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days_back)
 
     date_range = {
@@ -40,7 +38,6 @@ async def generate_report(
 
 @router.get("/tasks/{task_id}")
 async def get_task_status(task_id: str):
-    """Get task status"""
     from celery_app import celery_app
     result = celery_app.AsyncResult(task_id)
 

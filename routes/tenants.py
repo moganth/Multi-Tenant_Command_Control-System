@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 from typing import List
-from schemas.tenant import Tenant, TenantCreate, TenantUpdate
+from schemas.tenant import Tenant, TenantCreate
 from handlers.tenant_handler import tenant_handler
 
 router = APIRouter()

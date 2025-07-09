@@ -7,7 +7,7 @@ A scalable platform for remote monitoring and control of distributed devices and
 Modern organizations require centralized control over distributed devices, systems, and processes across multiple departments, or clients. Traditional solutions often lack:
 
 - **Tenant Isolation**: Secure separation of data and operations between different organizations or departments
-- **Real-time Communication**: Instant bidirectional communication with remote devices```````````````````````````````````````````````````````````````````````````````````````````````````````````
+- **Real-time Communication**: Instant bidirectional communication with remote devices
 - **Reliability**: Robust command execution, failure handling, and system monitoring
 - **Multi-protocol Support**: Integration with various device types and communication protocols
 - **Centralized Management**: Unified dashboard for monitoring, control, and analytics

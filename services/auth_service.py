@@ -1,5 +1,5 @@
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from schemas.auth import UserCreate, User, Token
 from utils.auth import create_access_token
 from utils.database import get_database
@@ -37,8 +37,8 @@ class AuthService:
             "full_name": user_data.full_name,
             "tenant_id": user_data.tenant_id,
             "is_active": True,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(UTC),
+            "updated_at": datetime.now(UTC)
         }
 
         try:

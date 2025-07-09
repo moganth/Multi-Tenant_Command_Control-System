@@ -1,5 +1,5 @@
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 from schemas.device import Device, DeviceCreate, DeviceUpdate, Command, CommandCreate
 from utils.database import get_database
 from utils.mqtt_client import mqtt_client
@@ -21,8 +21,8 @@ class DeviceService:
             "status": "offline",
             "configuration": device_data.configuration,
             "last_seen": None,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(UTC),
+            "updated_at": datetime.now(UTC)
         }
 
         await db.devices.insert_one(device_doc)
@@ -35,7 +35,7 @@ class DeviceService:
 
         # Send real-time update
         firebase_client.send_real_time_update(
-            tenant_id, "devices", device.id, device.dict()
+            tenant_id, "devices", device.id, device.model_dump()
         )
 
         return device
@@ -63,8 +63,8 @@ class DeviceService:
     async def update_device(self, device_id: str, tenant_id: str, device_data: DeviceUpdate) -> Optional[Device]:
         db = await get_database()
 
-        update_data = {k: v for k, v in device_data.dict().items() if v is not None}
-        update_data["updated_at"] = datetime.utcnow()
+        update_data = {k: v for k, v in device_data.model_dump().items() if v is not None}
+        update_data["updated_at"] = datetime.now(UTC)
 
         result = await db.devices.update_one(
             {"_id": device_id, "tenant_id": tenant_id},
@@ -79,7 +79,7 @@ class DeviceService:
 
         # Send real-time update
         firebase_client.send_real_time_update(
-            tenant_id, "devices", device.id, device.dict()
+            tenant_id, "devices", device.id, device.model_dump()
         )
 
         return device
@@ -109,7 +109,7 @@ class DeviceService:
             "parameters": command_data.parameters,
             "status": "pending",
             "result": None,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(UTC),
             "executed_at": None
         }
 
@@ -129,7 +129,7 @@ class DeviceService:
 
         # Send real-time update
         firebase_client.send_real_time_update(
-            tenant_id, "commands", command.id, command.dict()
+            tenant_id, "commands", command.id, command.model_dump()
         )
 
         return command

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from schemas.auth import User
 from handlers.auth_handler import get_current_active_user
@@ -18,16 +18,19 @@ router = APIRouter()
 async def send_mqtt_command(
         device_id: str,
         command: str,
-        parameters: Dict[str, Any] = {},
+        parameters: Optional[Dict[str, Any]] = None,
         current_user: User = Depends(get_current_active_user)
 ):
     try:
+        if parameters is None:
+            parameters = {}
+
         topic = f"tenant/{current_user.tenant_id}/device/{device_id}/command"
         payload = {
-            "command_id": f"cmd_{datetime.utcnow().timestamp()}",
+            "command_id": f"cmd_{datetime.now(UTC).timestamp()}",
             "command": command,
             "parameters": parameters,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "from_user": current_user.email
         }
 
@@ -47,16 +50,19 @@ async def send_mqtt_command(
 @router.post("/broadcast-command")
 async def broadcast_mqtt_command(
         command: str,
-        parameters: Dict[str, Any] = {},
+        parameters: Optional[Dict[str, Any]] = None,
         current_user: User = Depends(get_current_active_user)
 ):
     try:
+        if parameters is None:
+            parameters = {}
+
         topic = f"tenant/{current_user.tenant_id}/broadcast/{command}"
         payload = {
-            "command_id": f"broadcast_{datetime.utcnow().timestamp()}",
+            "command_id": f"broadcast_{datetime.now(UTC).timestamp()}",
             "command": command,
             "parameters": parameters,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "from_user": current_user.email
         }
 
@@ -76,10 +82,13 @@ async def broadcast_mqtt_command(
 async def send_bulk_mqtt_command(
         device_ids: List[str],
         command: str,
-        parameters: Dict[str, Any] = {},
+        parameters: Optional[Dict[str, Any]] = None,
         current_user: User = Depends(get_current_active_user)
 ):
     try:
+        if parameters is None:
+            parameters = {}
+
         task = send_bulk_command.delay(
             current_user.tenant_id,
             device_ids,
@@ -102,9 +111,7 @@ async def subscribe_to_topic(
         topic: str,
         current_user: User = Depends(get_current_active_user)
 ):
-    """Subscribe to a custom MQTT topic"""
     try:
-        # Ensure the topic is within the tenant's namespace
         if not topic.startswith(f"tenant/{current_user.tenant_id}/"):
             topic = f"tenant/{current_user.tenant_id}/{topic}"
 
@@ -113,7 +120,7 @@ async def subscribe_to_topic(
         return {
             "status": "subscribed",
             "topic": topic,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to subscribe to topic: {str(e)}")
@@ -143,7 +150,7 @@ async def get_device_status(
             "tenant_id": current_user.tenant_id,
             "devices": devices,
             "total_devices": len(devices),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get device status: {str(e)}")
@@ -158,7 +165,7 @@ async def get_device_telemetry(
     try:
         db = await get_database()
 
-        start_time = datetime.utcnow() - timedelta(hours=hours)
+        start_time = datetime.now(UTC) - timedelta(hours=hours)
 
         cursor = db.telemetry.find({
             "tenant_id": current_user.tenant_id,
@@ -181,7 +188,7 @@ async def get_device_telemetry(
             "total_records": len(telemetry_data),
             "time_range": {
                 "from": start_time.isoformat(),
-                "to": datetime.utcnow().isoformat()
+                "to": datetime.now(UTC).isoformat()
             }
         }
     except Exception as e:
@@ -210,7 +217,7 @@ async def get_device_alerts(
         if acknowledged is not None:
             query_filter["acknowledged"] = acknowledged
 
-        start_time = datetime.utcnow() - timedelta(hours=hours)
+        start_time = datetime.now(UTC) - timedelta(hours=hours)
         query_filter["timestamp"] = {"$gte": start_time.isoformat()}
 
         cursor = db.alerts.find(query_filter).sort("timestamp", -1)
@@ -260,7 +267,7 @@ async def acknowledge_alert(
                 "$set": {
                     "acknowledged": True,
                     "acknowledged_by": current_user.email,
-                    "acknowledged_at": datetime.utcnow().isoformat()
+                    "acknowledged_at": datetime.now(UTC).isoformat()
                 }
             }
         )
@@ -272,7 +279,7 @@ async def acknowledge_alert(
             "status": "acknowledged",
             "alert_id": alert_id,
             "acknowledged_by": current_user.email,
-            "acknowledged_at": datetime.utcnow().isoformat()
+            "acknowledged_at": datetime.now(UTC).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to acknowledge alert: {str(e)}")
@@ -296,7 +303,7 @@ async def resolve_alert(
                 "$set": {
                     "resolved": True,
                     "resolved_by": current_user.email,
-                    "resolved_at": datetime.utcnow().isoformat(),
+                    "resolved_at": datetime.now(UTC).isoformat(),
                     "resolution_notes": resolution_notes
                 }
             }
@@ -309,7 +316,7 @@ async def resolve_alert(
             "status": "resolved",
             "alert_id": alert_id,
             "resolved_by": current_user.email,
-            "resolved_at": datetime.utcnow().isoformat(),
+            "resolved_at": datetime.now(UTC).isoformat(),
             "resolution_notes": resolution_notes
         }
     except Exception as e:
@@ -334,7 +341,7 @@ async def get_command_history(
         if status:
             query_filter["status"] = status
 
-        start_time = datetime.utcnow() - timedelta(hours=hours)
+        start_time = datetime.now(UTC) - timedelta(hours=hours)
         query_filter["created_at"] = {"$gte": start_time.isoformat()}
 
         cursor = db.commands.find(query_filter).sort("created_at", -1)
@@ -375,10 +382,10 @@ async def trigger_health_check(
         if device_id:
             topic = f"tenant/{current_user.tenant_id}/device/{device_id}/command"
             payload = {
-                "command_id": f"health_{datetime.utcnow().timestamp()}",
+                "command_id": f"health_{datetime.now(UTC).timestamp()}",
                 "command": "health_check",
                 "parameters": {},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "from_user": current_user.email
             }
 
@@ -396,7 +403,7 @@ async def trigger_health_check(
                 "status": "health_check_queued",
                 "task_id": task.id,
                 "tenant_id": current_user.tenant_id,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to trigger health check: {str(e)}")
@@ -417,7 +424,7 @@ async def get_tenant_statistics(
             }}
         ]).to_list(length=None)
 
-        start_time = datetime.utcnow() - timedelta(hours=24)
+        start_time = datetime.now(UTC) - timedelta(hours=24)
         alert_stats = await db.alerts.aggregate([
             {
                 "$match": {
@@ -455,7 +462,7 @@ async def get_tenant_statistics(
             "alert_statistics": {stat["_id"]: stat["count"] for stat in alert_stats},
             "telemetry_records_24h": telemetry_count,
             "command_statistics": {stat["_id"]: stat["count"] for stat in command_stats},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get statistics: {str(e)}")
@@ -475,7 +482,7 @@ async def publish_custom_message(
         enhanced_payload = {
             **payload,
             "from_user": current_user.email,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
 
         mqtt_client.publish(topic, enhanced_payload)
@@ -523,7 +530,7 @@ async def get_mqtt_topics(
             "tenant_id": current_user.tenant_id,
             "mqtt_topics": topics,
             "description": "Available MQTT topics for your tenant. Use {device_id} as placeholder for actual device IDs.",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get MQTT topics: {str(e)}")

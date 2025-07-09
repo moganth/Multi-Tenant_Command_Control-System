@@ -1,14 +1,19 @@
+import subprocess
+import sys
+import os
+import uvicorn
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 from contextlib import asynccontextmanager
+from loguru import logger
+
 from config import settings
 from utils.database import connect_to_mongo, close_mongo_connection
 from utils.mqtt_client import mqtt_client
 from utils.supabase_client import supabase_client
 from routes import auth, devices, tenants, analytics, commands, health, mqtt
 from handlers.auth_handler import get_current_active_user
-from loguru import logger
 
 
 @asynccontextmanager
@@ -80,8 +85,20 @@ async def protected_endpoint(current_user=Depends(get_current_active_user)):
         "tenant": current_user.tenant_id
     }
 
+def start_celery_worker():
+    cmd = [
+        sys.executable, "-m", "celery",
+        "-A", "celery_app.celery_app",
+        "worker",
+        "--loglevel=info",
+        "--pool=solo"
+    ]
+    env = os.environ.copy()
+    subprocess.Popen(cmd, env=env)
+
 
 if __name__ == "__main__":
+    start_celery_worker()
 
     uvicorn.run(
         "main:app",

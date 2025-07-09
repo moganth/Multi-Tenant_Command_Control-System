@@ -1,7 +1,7 @@
 # utils/firebase_client.py
 import firebase_admin
 from firebase_admin import credentials, firestore
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from config import settings
 import os
 from loguru import logger

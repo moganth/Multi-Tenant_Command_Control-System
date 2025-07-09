@@ -1,9 +1,7 @@
 from typing import List
-from fastapi import HTTPException, status, Depends
-from schemas.tenant import Tenant, TenantCreate, TenantUpdate
-from schemas.auth import User
+from fastapi import HTTPException, status
+from schemas.tenant import Tenant, TenantCreate
 from services.tenant_service import tenant_service
-from handlers.auth_handler import get_current_active_user
 
 
 class TenantHandler:

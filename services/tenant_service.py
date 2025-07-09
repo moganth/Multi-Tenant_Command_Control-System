@@ -1,6 +1,6 @@
 from typing import List, Optional
-from datetime import datetime
-from schemas.tenant import Tenant, TenantCreate, TenantUpdate
+from datetime import datetime, UTC
+from schemas.tenant import Tenant, TenantCreate
 from utils.database import get_database
 from bson import ObjectId
 
@@ -15,8 +15,8 @@ class TenantService:
             "description": tenant_data.description,
             "settings": tenant_data.settings,
             "is_active": True,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(UTC),
+            "updated_at": datetime.now(UTC)
         }
 
         await db.tenants.insert_one(tenant_doc)

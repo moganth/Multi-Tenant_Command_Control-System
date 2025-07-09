@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from typing import List
-from schemas.device import Device, DeviceCreate, DeviceUpdate, Command, CommandCreate
+from schemas.device import Device, DeviceCreate, Command
 from handlers.device_handler import device_handler
 
 router = APIRouter()
