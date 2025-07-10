@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi.responses import FileResponse
+import os
 from typing import Dict, Any
 from schemas.auth import User
 from handlers.auth_handler import get_current_active_user
 from celery_tasks import process_device_analytics, generate_tenant_report
 from datetime import datetime, timedelta, UTC
+
+REPORTS_DIR = "reports"
 
 router = APIRouter()
 
@@ -34,6 +38,14 @@ async def generate_report(
 
     task = generate_tenant_report.delay(current_user.tenant_id, report_type, date_range)
     return {"task_id": task.id, "status": "generating"}
+
+@router.get("/reports/download/{filename}")
+async def download_report(filename: str, current_user: User = Depends(get_current_active_user)):
+    filepath = os.path.join(REPORTS_DIR, filename)
+    if os.path.exists(filepath):
+        return FileResponse(filepath, media_type='application/pdf', filename=filename)
+    else:
+        raise HTTPException(status_code=404, detail="Report not found")
 
 
 @router.get("/tasks/{task_id}")

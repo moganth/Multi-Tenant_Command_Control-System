@@ -6,14 +6,29 @@ from handlers.auth_handler import get_current_active_user
 
 router = APIRouter()
 
+
 @router.post("/register", response_model=User)
 async def register(user_data: UserCreate):
-    user = await auth_service.create_user(user_data)
+    user, error_message = await auth_service.create_user(user_data)
+
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists"
-        )
+        if error_message == "Tenant not found":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tenant not found"
+            )
+        elif error_message == "User already exists":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User already exists"
+            )
+        else:
+            # Handle any other error (Supabase errors, MongoDB errors, etc.)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_message or "Failed to create user"
+            )
+
     return user
 
 @router.post("/login", response_model=Token)

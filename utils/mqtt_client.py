@@ -21,6 +21,7 @@ class MQTTClient:
         self.client.subscribe("tenant/+/device/+/response")
         self.client.subscribe("tenant/+/device/+/alert")
         self.client.subscribe("tenant/+/device/+/heartbeat")
+        self.client.subscribe("tenant /+/ device /+/analytics")
         logger.info("Subscribed to all device topics")
 
     def on_message(self, client, userdata, msg):

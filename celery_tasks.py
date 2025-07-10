@@ -1,4 +1,7 @@
 import asyncio
+from reportlab.pdfgen import canvas
+import os
+from uuid import uuid4
 
 from loguru import logger
 from bson import ObjectId
@@ -9,6 +12,7 @@ from utils.database import get_database, connect_to_mongo
 from utils.mqtt_client import mqtt_client
 from utils.firebase_client import firebase_client
 
+REPORTS_DIR = "reports"
 
 @celery_app.on_after_configure.connect
 def setup_mqtt_client(sender, **kwargs):
@@ -19,7 +23,7 @@ def send_bulk_command(self, tenant_id: str, device_ids: list, command: str, para
     try:
         results = []
         for device_id in device_ids:
-            topic = f"tenant/{tenant_id}/device/{device_id}/command"
+            cmd_topic = f"tenant/{tenant_id}/device/{device_id}/command"
             payload = {
                 "command_id": self.request.id,
                 "command": command,
@@ -27,7 +31,7 @@ def send_bulk_command(self, tenant_id: str, device_ids: list, command: str, para
                 "timestamp": datetime.now(UTC).isoformat()
             }
 
-            mqtt_client.publish(topic, payload)
+            mqtt_client.publish(cmd_topic, payload)
             results.append({"device_id": device_id, "status": "sent"})
 
         return {"status": "completed", "results": results}
@@ -39,6 +43,7 @@ def send_bulk_command(self, tenant_id: str, device_ids: list, command: str, para
 @celery_app.task(bind=True)
 def process_device_analytics(self, tenant_id: str, device_id: str, data: dict):
     try:
+        analytics_topic = f"tenant/{tenant_id}/device/{device_id}/analytics"
         processed_data = {
             "tenant_id": tenant_id,
             "device_id": device_id,
@@ -49,6 +54,8 @@ def process_device_analytics(self, tenant_id: str, device_id: str, data: dict):
         firebase_client.send_real_time_update(
             tenant_id, "analytics", device_id, processed_data
         )
+
+        mqtt_client.publish(analytics_topic, processed_data)
 
         return {"status": "completed", "processed_data": processed_data}
     except Exception as e:
@@ -76,12 +83,26 @@ def health_check_devices(self, tenant_id: str):
 @celery_app.task(bind=True)
 def generate_tenant_report(self, tenant_id: str, report_type: str, date_range: dict):
     try:
+        os.makedirs(REPORTS_DIR, exist_ok=True)
+        filename = f"{uuid4()}_report.pdf"
+        filepath = os.path.join(REPORTS_DIR, filename)
+
+        # Generate a basic PDF report
+        c = canvas.Canvas(filepath)
+        c.drawString(100, 800, f"Report for Tenant: {tenant_id}")
+        c.drawString(100, 780, f"Type: {report_type}")
+        c.drawString(100, 760, f"Date Range: {date_range['start']} to {date_range['end']}")
+        c.drawString(100, 740, f"Generated at: {datetime.now(UTC).isoformat()}")
+        c.save()
+
         report_data = {
             "tenant_id": tenant_id,
             "report_type": report_type,
             "date_range": date_range,
             "generated_at": datetime.now(UTC).isoformat(),
-            "status": "completed"
+            "status": "completed",
+            "report_path": filepath,
+            "download_url": f"/api/v1/reports/download/{filename}"
         }
 
         firebase_client.send_notification(
@@ -89,6 +110,7 @@ def generate_tenant_report(self, tenant_id: str, report_type: str, date_range: d
         )
 
         return report_data
+
     except Exception as e:
         logger.error(f"Error in report generation task: {e}")
         return {"status": "failed", "error": str(e)}
@@ -224,6 +246,7 @@ def update_command_status_task(self, tenant_id: str, device_id: str, response_da
 def process_device_alert_task(self, tenant_id: str, device_id: str, alert_data: dict):
 
     try:
+        alert_topic = f"tenant/{tenant_id}/device/{device_id}/alert"
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
@@ -259,6 +282,8 @@ def process_device_alert_task(self, tenant_id: str, device_id: str, alert_data: 
             firebase_client.send_real_time_update(
                 tenant_id, "alerts", alert_doc["_id"], alert_doc
             )
+
+            mqtt_client.publish(alert_topic, alert_doc)
 
             logger.info(f"Processed alert for {tenant_id}/{device_id}: {alert_data.get('type')}")
 
