@@ -16,3 +16,5 @@ pydantic[email]
 python-dotenv
 httpx
 loguru
+asyncpg
+reportlab

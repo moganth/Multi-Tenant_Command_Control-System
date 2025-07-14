@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-app-deployment
+  namespace: moganthkumar
+  labels:
+    app: iot-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: iot-app
+  template:
+    metadata:
+      labels:
+        app: iot-app
+    spec:
+      containers:
+      - name: iot-app
+        image: moganthkumar/multi-tenant-image:v1.4
+        ports:
+        - containerPort: 8000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        envFrom:
+        - secretRef:
+            name: iot-app-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iot-app-service
+  namespace: moganthkumar
+spec:
+  type: NodePort
+  selector:
+    app: iot-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+    nodePort: 30029

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker-deployment
+  namespace: moganthkumar
+  labels:
+    app: celery-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      containers:
+      - name: celery-worker
+        image: moganthkumar/multi-tenant-image:v1.4
+        command: ["python", "-m", "celery", "-A", "celery_app.celery_app", "worker", "--loglevel=info", "--pool=solo", "-E"]
+        envFrom:
+        - secretRef:
+            name: iot-app-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: reports-volume
+          mountPath: /app/reports
+      volumes:
+      - name: reports-volume
+        emptyDir: {}
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat-deployment
+  namespace: moganthkumar
+  labels:
+    app: celery-beat
+spec:
+  replicas: 1  # Only one beat scheduler needed
+  selector:
+    matchLabels:
+      app: celery-beat
+  template:
+    metadata:
+      labels:
+        app: celery-beat
+    spec:
+      containers:
+      - name: celery-beat
+        image: moganthkumar/multi-tenant-image:v1.4
+        command: ["python", "-m", "celery", "-A", "celery_app.celery_app", "beat", "--loglevel=info"]
+        envFrom:
+        - secretRef:
+            name: iot-app-secrets
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      restartPolicy: Always

@@ -14,10 +14,6 @@ from utils.firebase_client import firebase_client
 
 REPORTS_DIR = "reports"
 
-@celery_app.on_after_configure.connect
-def setup_mqtt_client(sender, **kwargs):
-    mqtt_client.connect()
-
 @celery_app.task(bind=True)
 def send_bulk_command(self, tenant_id: str, device_ids: list, command: str, parameters: dict):
     try:

@@ -28,7 +28,7 @@ class AuthService:
 
         # Create user in Supabase with proper error handling
         try:
-            supabase_response = await supabase_client.create_user(
+            supabase_response = supabase_client.create_user(
                 user_data.email,
                 user_data.password,
                 {"full_name": user_data.full_name, "tenant_id": user_data.tenant_id}
@@ -70,7 +70,7 @@ class AuthService:
         db = await get_database()
 
         # Authenticate with Supabase
-        supabase_response = await supabase_client.authenticate_user(email, password)
+        supabase_response = supabase_client.authenticate_user(email, password)
         if not supabase_response:
             logger.warning(f"Authentication failed for user: {email}")
             return None

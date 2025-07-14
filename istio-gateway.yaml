@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: moganthkumar
+spec:
+  selector:
+    istio: ingressgateway  # This should match the label of the ingress gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "192.168.3.152"

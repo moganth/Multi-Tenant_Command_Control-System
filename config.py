@@ -24,12 +24,14 @@ class Settings(BaseSettings):
     MQTT_PASSWORD: Optional[str] = os.getenv("MQTT_PASSWORD")
 
     # Supabase Configuration - Using os.getenv() with proper type annotations
-    SUPABASE_DB_HOST: str = os.getenv("SUPABASE_DB_HOST")
-    SUPABASE_DB_PORT: str = os.getenv("SUPABASE_DB_PORT")
-    SUPABASE_DB_NAME: str = os.getenv("SUPABASE_DB_NAME")
-    SUPABASE_DB_USER: str = os.getenv("SUPABASE_DB_USER")
-    SUPABASE_DB_PASSWORD: str = os.getenv("SUPABASE_DB_PASSWORD")
-    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL")
+    SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY")
+    # SUPABASE_DB_HOST: str = os.getenv("SUPABASE_DB_HOST")
+    # SUPABASE_DB_PORT: str = os.getenv("SUPABASE_DB_PORT")
+    # SUPABASE_DB_NAME: str = os.getenv("SUPABASE_DB_NAME")
+    # SUPABASE_DB_USER: str = os.getenv("SUPABASE_DB_USER")
+    # SUPABASE_DB_PASSWORD: str = os.getenv("SUPABASE_DB_PASSWORD")
+    # SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
     # Firebase Configuration
     FIREBASE_CREDENTIALS_PATH: str = "multi-tenant-d2b35-firebase-adminsdk-fbsvc-b3c5a315db.json"

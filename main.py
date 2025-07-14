@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     await connect_to_mongo()
     logger.info("Connected to MongoDB")
 
-    supabase_connected = await supabase_client.test_connection()
+    supabase_connected = supabase_client.test_connection()
     if supabase_connected:
         logger.info("Connected to Supabase")
     else:
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "main:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         reload=True,
         log_level="info"

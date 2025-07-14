@@ -1,3 +1,6 @@
+import logging
+import time
+
 from celery import Celery
 from celery.signals import worker_process_init
 from config import settings
@@ -23,4 +26,21 @@ celery_app.conf.update(
 
 @worker_process_init.connect
 def init_worker_mqtt(**_):
-    mqtt_client.connect()
+    max_attempts = 10
+    attempt = 1
+    delay = 5  # seconds
+
+    while attempt <= max_attempts:
+        try:
+            logging.info(f"[MQTT] Attempt {attempt}: Connecting to {settings.MQTT_BROKER_HOST}:{settings.MQTT_BROKER_PORT}")
+            mqtt_client.connect()
+            logging.info("[MQTT] Connected successfully.")
+            break
+        except Exception as e:
+            logging.error(f"[MQTT] Connection attempt {attempt} failed: {e}")
+            attempt += 1
+            time.sleep(delay)
+            delay = min(delay * 2, 60)  # exponential backoff (max 60s)
+
+    if attempt > max_attempts:
+        logging.critical("[MQTT] Failed to connect after multiple attempts. Exiting.")

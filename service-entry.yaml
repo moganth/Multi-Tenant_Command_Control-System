@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: allow-mqtt-broker-egress
+spec:
+  hosts:
+  - "mqtt-broker.local"     # Dummy DNS name for Istio's internal tracking
+  addresses:
+  - 192.168.3.152/32        # Actual broker IP
+  ports:
+  - number: 1884
+    name: mqtt
+    protocol: TCP
+  location: MESH_EXTERNAL
